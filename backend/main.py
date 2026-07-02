@@ -1,6 +1,8 @@
 import math
 import re
 from typing import Optional, Tuple
+import base64
+from io import BytesIO
 
 import pandas as pd
 import requests
@@ -9,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sklearn.decomposition import PCA
 
 from rdkit import Chem
-from rdkit.Chem import Descriptors, AllChem, rdMolDescriptors, DataStructs, QED
+from rdkit.Chem import Descriptors, AllChem, rdMolDescriptors, DataStructs, QED, Draw
 from rdkit.Chem import FilterCatalog
 
 app = FastAPI(
@@ -267,6 +269,26 @@ def _sas(mol) -> float:
     return round(max(1.0, 1.0 + 0.02 * heavy_atoms + 0.03 * ring_count), 4)
 
 
+def _generate_2d_structure(mol) -> str:
+    """Generate 2D structure SVG from molecule"""
+    try:
+        # Generate 2D coordinates
+        AllChem.Compute2DCoords(mol)
+        
+        # Draw molecule to image
+        img = Draw.MolToImage(mol, size=(400, 400))
+        
+        # Convert to base64
+        buffered = BytesIO()
+        img.save(buffered, format="PNG")
+        img_str = base64.b64encode(buffered.getvalue()).decode()
+        
+        return f"data:image/png;base64,{img_str}"
+    except Exception as e:
+        print(f"Error generating 2D structure: {e}")
+        return None
+
+
 @app.get("/analyze/{smiles}")
 def analyze(smiles: str):
     try:
@@ -278,10 +300,12 @@ def analyze(smiles: str):
 
         morgan = _morgan_fp(mol)
         maccs = _maccs_fp(mol)
+        structure_image = _generate_2d_structure(mol)
 
         return {
             "metadata": metadata,
             "smiles": resolved_smiles,
+            "structure_image": structure_image,
             "molecular_weight": round(Descriptors.MolWt(mol), 2),
             "logP": round(Descriptors.MolLogP(mol), 2),
             "TPSA": round(Descriptors.TPSA(mol), 2),
