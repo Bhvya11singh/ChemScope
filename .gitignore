@@ -1,55 +1,38 @@
-# =========================
-# Logs
-# =========================
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+# ===========================
+# Python
+# ===========================
+backend/venv/
+backend/__pycache__/
+backend/**/*.pyc
+*.py[cod]
 
-# =========================
-# Node / Vite
-# =========================
+# Environment files
+.env
+.env.*
+
+# ===========================
+# React / Node
+# ===========================
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
 node_modules/
 dist/
-dist-ssr/
-*.local
 
-# =========================
-# Python
-# =========================
-venv/
-.venv/
-env/
+# ===========================
+# VS Code
+# ===========================
+.vscode/
 
-__pycache__/
-*.py[cod]
-*$py.class
-
-# Python build files
-build/
-*.egg-info/
-
-# Environment variables
-.env
-
-# =========================
-# VS Code / IDE
-# =========================
-.vscode/*
-!.vscode/extensions.json
-.idea/
-
-# =========================
-# OS files
-# =========================
+# ===========================
+# macOS / Windows
+# ===========================
 .DS_Store
 Thumbs.db
 
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# ===========================
+# Logs
+# ===========================
+*.log
+npm-debug.log*
