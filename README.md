@@ -276,27 +276,22 @@ Output
 
 ## Home Page
 
-(Add screenshot)
+
+<img width="1421" height="562" alt="Screenshot 2026-07-02 141625" src="https://github.com/user-attachments/assets/5474affe-b6f6-4804-bd74-d62177ff7f24" />
 
 ---
 
 ## Molecular Workspace
 
-(Add screenshot)
+<img width="1358" height="706" alt="Screenshot 2026-07-02 141716" src="https://github.com/user-attachments/assets/93e2dc85-b9d6-45c9-b61b-bd29fa8ba23c" />
+
 
 ---
 
 ## Analysis Dashboard
 
-(Add screenshot)
+<img width="1911" height="573" alt="Screenshot 2026-07-02 141739" src="https://github.com/user-attachments/assets/c15b2b45-af3f-40dd-8a80-db3f2f1416ff" />
 
----
-
-## Clustering
-
-(Add screenshot)
-
----
 
 # Roadmap
 
