@@ -1,25 +1,27 @@
-FROM python:3.11-slim
+FROM continuumio/miniconda3
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
-    gcc \
-    g++ \
-    gfortran \
-    libopenblas-dev \
-    liblapack-dev \
-    && rm -rf /var/lib/apt/lists/*
+# Install RDKit and scientific packages from conda-forge
+RUN conda install -y -c conda-forge \
+    python=3.11 \
+    rdkit \
+    numpy \
+    pandas \
+    scikit-learn \
+    pip && \
+    conda clean -afy
 
 COPY requirements.txt .
 
-RUN pip install --upgrade pip
-
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir \
+    fastapi \
+    uvicorn[standard] \
+    requests \
+    python-multipart
 
 COPY . .
 
 EXPOSE 10000
 
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "10000"]
-
-
