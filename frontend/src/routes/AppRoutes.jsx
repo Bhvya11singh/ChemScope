@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import DashboardLayout from "../layouts/DashboardLayout";
+
 import Home from "../pages/Home";
 import Workspace from "../pages/Workspace";
 import Datasets from "../pages/Datasets";
@@ -13,14 +14,27 @@ function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="datasets" element={<Datasets />} />
-        <Route path="clustering" element={<Clustering />} />
-        <Route path="descriptors" element={<Descriptors />} />
-        <Route path="similarity" element={<Similarity />} />
-        <Route path="about" element={<About />} />
         <Route path="/" element={<DashboardLayout />}>
+          {/* Home */}
           <Route index element={<Home />} />
+
+          {/* Workspace */}
           <Route path="workspace" element={<Workspace />} />
+
+          {/* Dataset */}
+          <Route path="datasets" element={<Datasets />} />
+
+          {/* Descriptors */}
+          <Route path="descriptors" element={<Descriptors />} />
+
+          {/* Similarity */}
+          <Route path="similarity" element={<Similarity />} />
+
+          {/* Clustering */}
+          <Route path="clustering" element={<Clustering />} />
+
+          {/* About */}
+          <Route path="about" element={<About />} />
         </Route>
       </Routes>
     </BrowserRouter>
