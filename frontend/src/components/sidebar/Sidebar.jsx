@@ -39,6 +39,12 @@ function Sidebar() {
     },
 
     {
+      path: "/clustering",
+      icon: <FaBrain />,
+      label: "Clustering",
+    },
+
+    {
       path: "/datasets",
       icon: <FaDatabase />,
       label: "Datasets",

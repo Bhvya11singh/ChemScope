@@ -6,6 +6,7 @@ import Workspace from "../pages/Workspace";
 import Datasets from "../pages/Datasets";
 import Descriptors from "../pages/Descriptors";
 import Similarity from "../pages/Similarity";
+import Clustering from "../pages/Clustering";
 import About from "../pages/About";
 
 function AppRoutes() {
@@ -13,6 +14,7 @@ function AppRoutes() {
     <BrowserRouter>
       <Routes>
         <Route path="datasets" element={<Datasets />} />
+        <Route path="clustering" element={<Clustering />} />
         <Route path="descriptors" element={<Descriptors />} />
         <Route path="similarity" element={<Similarity />} />
         <Route path="about" element={<About />} />

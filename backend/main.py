@@ -1,14 +1,17 @@
 import math
 import re
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 import base64
 from io import BytesIO
 
 import pandas as pd
 import requests
+import numpy as np
 from fastapi import FastAPI, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
 from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans, DBSCAN
+from sklearn.preprocessing import StandardScaler
 
 from rdkit import Chem
 from rdkit.Chem import Descriptors, AllChem, rdMolDescriptors, DataStructs, QED, Draw
@@ -356,5 +359,156 @@ def run_pca(dataset: list = Body(...)):
             "points": [{"pc1": float(point[0]), "pc2": float(point[1])} for point in components],
         }
 
+    except Exception as e:
+        return {"error": str(e)}
+
+
+def _get_fingerprints_matrix(smiles_list: List[str], fp_type: str = "morgan") -> np.ndarray:
+    """Generate fingerprint matrix from SMILES list"""
+    fingerprints = []
+    valid_smiles = []
+    
+    for smiles in smiles_list:
+        resolved_smiles, _ = _resolve_smiles(smiles)
+        mol = Chem.MolFromSmiles(resolved_smiles)
+        
+        if mol is not None:
+            if fp_type == "morgan":
+                fp = _morgan_fp(mol)
+            else:
+                fp = _maccs_fp(mol)
+            
+            # Convert fingerprint to numpy array
+            fp_array = np.array(list(fp), dtype=np.float32)
+            fingerprints.append(fp_array)
+            valid_smiles.append(resolved_smiles)
+    
+    if not fingerprints:
+        raise ValueError("No valid molecules found")
+    
+    return np.array(fingerprints), valid_smiles
+
+
+@app.post("/cluster")
+def cluster_molecules(request_data: dict = Body(...)):
+    """K-Means clustering of molecules"""
+    try:
+        smiles_list = request_data.get("smiles", [])
+        n_clusters = request_data.get("n_clusters", 3)
+        fp_type = request_data.get("fp_type", "morgan")
+        
+        if not smiles_list:
+            return {"error": "No SMILES provided"}
+        
+        if len(smiles_list) < n_clusters:
+            return {"error": f"Cannot create {n_clusters} clusters with only {len(smiles_list)} molecules"}
+        
+        # Get fingerprints
+        fp_matrix, valid_smiles = _get_fingerprints_matrix(smiles_list, fp_type)
+        
+        # Standardize
+        scaler = StandardScaler()
+        fp_scaled = scaler.fit_transform(fp_matrix)
+        
+        # K-Means clustering
+        kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
+        clusters = kmeans.fit_predict(fp_scaled)
+        
+        # Calculate silhouette score
+        from sklearn.metrics import silhouette_score
+        silhouette = silhouette_score(fp_scaled, clusters)
+        
+        return {
+            "clusters": clusters.tolist(),
+            "smiles": valid_smiles,
+            "n_clusters": n_clusters,
+            "silhouette_score": float(silhouette),
+            "centroids": kmeans.cluster_centers_.tolist()
+        }
+    
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@app.post("/umap")
+def umap_reduction(request_data: dict = Body(...)):
+    """UMAP dimensionality reduction for visualization"""
+    try:
+        smiles_list = request_data.get("smiles", [])
+        fp_type = request_data.get("fp_type", "morgan")
+        n_neighbors = request_data.get("n_neighbors", 15)
+        min_dist = request_data.get("min_dist", 0.1)
+        
+        if not smiles_list:
+            return {"error": "No SMILES provided"}
+        
+        # Try to import UMAP
+        try:
+            import umap
+        except ImportError:
+            return {"error": "UMAP not installed. Use 'pip install umap-learn'"}
+        
+        # Get fingerprints
+        fp_matrix, valid_smiles = _get_fingerprints_matrix(smiles_list, fp_type)
+        
+        # Standardize
+        scaler = StandardScaler()
+        fp_scaled = scaler.fit_transform(fp_matrix)
+        
+        # UMAP reduction
+        reducer = umap.UMAP(
+            n_components=2,
+            n_neighbors=min(n_neighbors, len(valid_smiles) - 1),
+            min_dist=min_dist,
+            random_state=42
+        )
+        embedding = reducer.fit_transform(fp_scaled)
+        
+        return {
+            "embedding": embedding.tolist(),
+            "smiles": valid_smiles,
+            "x": embedding[:, 0].tolist(),
+            "y": embedding[:, 1].tolist()
+        }
+    
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@app.post("/tsne")
+def tsne_reduction(request_data: dict = Body(...)):
+    """t-SNE dimensionality reduction for visualization"""
+    try:
+        smiles_list = request_data.get("smiles", [])
+        fp_type = request_data.get("fp_type", "morgan")
+        perplexity = request_data.get("perplexity", 30)
+        
+        if not smiles_list:
+            return {"error": "No SMILES provided"}
+        
+        if len(smiles_list) < 3:
+            return {"error": "t-SNE requires at least 3 molecules"}
+        
+        from sklearn.manifold import TSNE
+        
+        # Get fingerprints
+        fp_matrix, valid_smiles = _get_fingerprints_matrix(smiles_list, fp_type)
+        
+        # Standardize
+        scaler = StandardScaler()
+        fp_scaled = scaler.fit_transform(fp_matrix)
+        
+        # t-SNE reduction
+        perp = min(perplexity, (len(valid_smiles) - 1) / 3)
+        tsne = TSNE(n_components=2, perplexity=perp, random_state=42, n_iter=1000)
+        embedding = tsne.fit_transform(fp_scaled)
+        
+        return {
+            "embedding": embedding.tolist(),
+            "smiles": valid_smiles,
+            "x": embedding[:, 0].tolist(),
+            "y": embedding[:, 1].tolist()
+        }
+    
     except Exception as e:
         return {"error": str(e)}
