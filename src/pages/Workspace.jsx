@@ -3,7 +3,7 @@ import axios from "axios";
 import Plot from "react-plotly.js";
 import MoleculeViewer from "../components/workspace/MoleculeViewer";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8001";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
 function Workspace() {
   const [query, setQuery] = useState("");
@@ -341,7 +341,7 @@ function Workspace() {
               </div>
               <span className="status-pill ok">{result.source || "SMILES input"}</span>
             </div>
-            <MoleculeViewer smiles={result.smiles} />
+            <MoleculeViewer smiles={result.smiles} structureImage={result.structure_image} />
             <div className="info-list">
               <div>
                 <span>Resolved SMILES</span>
