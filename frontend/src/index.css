@@ -1031,3 +1031,15 @@ body {
 .example-section {
   margin-bottom: 2rem;
 }
+.chart-container{
+    position: relative;
+    width: 100%;
+    height: 420px;
+
+    max-height: 420px;
+    min-height: 420px;
+
+    overflow: hidden;
+
+    margin-top: 20px;
+}

@@ -360,7 +360,15 @@ function Datasets() {
             </div>
           </div>
 
-          {xColumn && yColumn && <Scatter data={createScatterData()} options={{ responsive: true, maintainAspectRatio: false }} />}
+          {xColumn && yColumn && <div className="chart-container">
+    <Scatter
+        data={createScatterData()}
+        options={{
+            responsive: true,
+            maintainAspectRatio: false,
+        }}
+    />
+</div>}
         </div>
       )}
 
@@ -372,26 +380,43 @@ function Datasets() {
             <span className="metric-pill">PC2 Variance: {(pcaResults.explained_variance[1] * 100).toFixed(2)}%</span>
           </div>
 
-          <Scatter
-            data={{
-              datasets: [
+          <div className="chart-container">
+    <Scatter
+        data={{
+            datasets: [
                 {
-                  label: "PCA",
-                  data: pcaResults.points.map((point) => ({ x: point.pc1, y: point.pc2 })),
-                  pointRadius: 7,
-                  pointBackgroundColor: pcaResults.points.map((_, index) => chartPalette[index % chartPalette.length]),
+                    label: "PCA",
+                    data: pcaResults.points.map((point) => ({
+                        x: point.pc1,
+                        y: point.pc2,
+                    })),
+                    pointRadius: 7,
+                    pointBackgroundColor: pcaResults.points.map(
+                        (_, index) => chartPalette[index % chartPalette.length]
+                    ),
                 },
-              ],
-            }}
-            options={{
-              responsive: true,
-              maintainAspectRatio: false,
-              scales: {
-                x: { title: { display: true, text: "PC1" } },
-                y: { title: { display: true, text: "PC2" } },
-              },
-            }}
-          />
+            ],
+        }}
+        options={{
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: "PC1",
+                    },
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: "PC2",
+                    },
+                },
+            },
+        }}
+    />
+</div>
         </div>
       )}
 
@@ -399,7 +424,15 @@ function Datasets() {
         getNumericColumns().map((column) => (
           <div className="descriptor-card mt-4" key={column}>
             <h3>{column} Distribution</h3>
-            <Bar data={createChartData(column)} options={{ responsive: true, maintainAspectRatio: false }} />
+            <div className="chart-container">
+    <Bar
+        data={createChartData(column)}
+        options={{
+            responsive: true,
+            maintainAspectRatio: false,
+        }}
+    />
+</div>
           </div>
         ))}
     </div>
