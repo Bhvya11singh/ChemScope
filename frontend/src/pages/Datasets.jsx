@@ -50,6 +50,22 @@ function Datasets() {
     "#0891b2",
   ];
 
+  // Fix 3: Upgraded base chart configurations shared across instances
+  const upgradedChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: {
+      duration: 900,
+    },
+    plugins: {
+      legend: {
+        labels: {
+          color: "#dbeafe",
+        },
+      },
+    },
+  };
+
   const handleFileUpload = (e) => {
     const file = e.target.files?.[0];
 
@@ -213,39 +229,6 @@ function Datasets() {
     };
   };
 
-  const correlation = (x, y) => {
-    const n = x.length;
-    if (n === 0) return 0;
-
-    const meanX = x.reduce((a, b) => a + b, 0) / n;
-    const meanY = y.reduce((a, b) => a + b, 0) / n;
-
-    let numerator = 0;
-    let denominatorX = 0;
-    let denominatorY = 0;
-
-    for (let i = 0; i < n; i++) {
-      numerator += (x[i] - meanX) * (y[i] - meanY);
-      denominatorX += Math.pow(x[i] - meanX, 2);
-      denominatorY += Math.pow(y[i] - meanY, 2);
-    }
-
-    const denominator = Math.sqrt(denominatorX * denominatorY);
-    return denominator === 0 ? 0 : numerator / denominator;
-  };
-
-  const getCorrelationMatrix = () => {
-    const cols = getNumericColumns();
-
-    return cols.map((col1) =>
-      cols.map((col2) => {
-        const x = data.map((row) => parseFloat(row[col1])).filter((v) => !Number.isNaN(v));
-        const y = data.map((row) => parseFloat(row[col2])).filter((v) => !Number.isNaN(v));
-        return Number(correlation(x, y).toFixed(2));
-      })
-    );
-  };
-
   return (
     <div className="container-fluid">
       <div className="hero-banner mb-4">
@@ -360,15 +343,12 @@ function Datasets() {
             </div>
           </div>
 
-          {xColumn && yColumn && <div className="chart-container">
-    <Scatter
-        data={createScatterData()}
-        options={{
-            responsive: true,
-            maintainAspectRatio: false,
-        }}
-    />
-</div>}
+          {/* Fix 1: Explicit chart wrapper container */}
+          {xColumn && yColumn && (
+            <div className="chart-container">
+              <Scatter data={createScatterData()} options={upgradedChartOptions} />
+            </div>
+          )}
         </div>
       )}
 
@@ -380,43 +360,43 @@ function Datasets() {
             <span className="metric-pill">PC2 Variance: {(pcaResults.explained_variance[1] * 100).toFixed(2)}%</span>
           </div>
 
+          {/* Fix 1: Explicit chart wrapper container */}
           <div className="chart-container">
-    <Scatter
-        data={{
-            datasets: [
-                {
+            <Scatter
+              data={{
+                datasets: [
+                  {
                     label: "PCA",
                     data: pcaResults.points.map((point) => ({
-                        x: point.pc1,
-                        y: point.pc2,
+                      x: point.pc1,
+                      y: point.pc2,
                     })),
                     pointRadius: 7,
                     pointBackgroundColor: pcaResults.points.map(
-                        (_, index) => chartPalette[index % chartPalette.length]
+                      (_, index) => chartPalette[index % chartPalette.length]
                     ),
-                },
-            ],
-        }}
-        options={{
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: {
+                  },
+                ],
+              }}
+              options={{
+                ...upgradedChartOptions,
+                scales: {
+                  x: {
                     title: {
-                        display: true,
-                        text: "PC1",
+                      display: true,
+                      text: "PC1",
                     },
-                },
-                y: {
+                  },
+                  y: {
                     title: {
-                        display: true,
-                        text: "PC2",
+                      display: true,
+                      text: "PC2",
                     },
+                  },
                 },
-            },
-        }}
-    />
-</div>
+              }}
+            />
+          </div>
         </div>
       )}
 
@@ -424,15 +404,10 @@ function Datasets() {
         getNumericColumns().map((column) => (
           <div className="descriptor-card mt-4" key={column}>
             <h3>{column} Distribution</h3>
+            {/* Fix 1: Explicit chart wrapper container */}
             <div className="chart-container">
-    <Bar
-        data={createChartData(column)}
-        options={{
-            responsive: true,
-            maintainAspectRatio: false,
-        }}
-    />
-</div>
+              <Bar data={createChartData(column)} options={upgradedChartOptions} />
+            </div>
           </div>
         ))}
     </div>
